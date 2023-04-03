@@ -16,7 +16,7 @@ public class KinematicController : MonoBehaviour{
 		
 		if (Input.GetKey(KeyCode.Q)) direction.y = -1;
 		
-		direction.z = Input.GetAxis("Vertical"); ;
+		direction.z = Input.GetAxis("Vertical");
 
 		transform.Translate(direction * speed * Time.deltaTime);
 	
