@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Search;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -11,10 +12,24 @@ public class ControllerCharacter : MonoBehaviour{
 	[SerializeField] float turnRate;
 	
 	[SerializeField] float jumpHeight;
-	
+
+	[SerializeField] float doubleJumpHeight;
+
+	[SerializeField, Range(0,1)] float waitJumpTime;
+
 	[SerializeField] float hitForce;
 
-	CharacterController characterController;
+    [SerializeField, Range(1, 5)] float fallRateMultiplier;
+
+    [SerializeField, Range(1, 5)] float lowJumpRateMultiplier;
+
+    [Header("Ground")]
+
+    [SerializeField] Transform groundTransform;
+    
+	[SerializeField] LayerMask groundLayerMask;
+
+    CharacterController characterController;
 	
 	Vector3 velocity = Vector3.zero;
 
@@ -26,9 +41,11 @@ public class ControllerCharacter : MonoBehaviour{
 
 	void Update(){
 
-		// get direction input
-		
-		Vector3 direction = Vector3.zero;
+        bool onGround = Physics.CheckSphere(groundTransform.position, 0.2f, groundLayerMask, QueryTriggerInteraction.Ignore);
+
+        // get direction input
+
+        Vector3 direction = Vector3.zero;
 		
 		direction.x = Input.GetAxis("Horizontal");
 		
@@ -36,27 +53,39 @@ public class ControllerCharacter : MonoBehaviour{
 
 		// set velocity
 		
-		if (characterController.isGrounded){
+		if (onGround){
 
-			velocity.x = direction.x * speed;
-			
-			velocity.z = direction.z * speed;
-		
-			if(velocity.y < 0) velocity.y = 0;
+            velocity.x = direction.x * speed;
+
+            velocity.z = direction.z * speed;
+
+            if (velocity.y < 0) velocity.y = 0;
 
 			if (Input.GetButtonDown("Jump")){ 
 			
 				velocity.y += Mathf.Sqrt(jumpHeight * -2 * Physics.gravity.y);
-			
-			}
+
+                StartCoroutine(DoubleJump(waitJumpTime));
+
+            }
 
 		}
 
 		velocity.y += Physics.gravity.y * Time.deltaTime;
 
-		// move character
-		
-		characterController.Move(velocity * Time.deltaTime);
+        // adjust gravity for jump
+
+        float gravityMultiplier = 1;
+        
+		if (!onGround && velocity.y < 0) gravityMultiplier = fallRateMultiplier;
+
+		if (!onGround && velocity.y > 0 && !Input.GetButton("Jump")) gravityMultiplier = lowJumpRateMultiplier;
+
+		velocity.y += Physics.gravity.y * gravityMultiplier * Time.deltaTime;
+
+        // move character
+
+        characterController.Move(velocity * Time.deltaTime);
 
 		Vector3 face = new Vector3(velocity.x, 0, velocity.z);
 
@@ -68,7 +97,33 @@ public class ControllerCharacter : MonoBehaviour{
 
 	}
 
-	void OnControllerColliderHit(ControllerColliderHit hit){
+    IEnumerator DoubleJump(float timer){
+
+        // wait a little after the jump to allow a double jump
+        
+		yield return new WaitForSeconds(0.01f);
+        
+		// allow a double jump while moving up
+        
+		while (velocity.y > 0){
+
+            // if "jump" pressed add jump velocity
+            
+			if (Input.GetButtonDown("Jump")){
+
+                velocity.y += Mathf.Sqrt(doubleJumpHeight * -2 * Physics.gravity.y);
+
+                break;
+            
+			}
+
+            yield return null;
+        
+		}
+
+    }
+
+    void OnControllerColliderHit(ControllerColliderHit hit){
 
 		Rigidbody body = hit.collider.attachedRigidbody;
 
