@@ -17,8 +17,6 @@ public class ControllerCharacter2D : MonoBehaviour{
 
 	[SerializeField] float doubleJumpHeight;
 
-	//[SerializeField, Range(0,1)] float waitJumpTime;
-
 	[SerializeField] float hitForce;
 
     [SerializeField, Range(1, 5)] float fallRateMultiplier;
@@ -42,12 +40,12 @@ public class ControllerCharacter2D : MonoBehaviour{
 	void Start(){
 
 		rb = GetComponent<Rigidbody2D>();
-	
+
 	}
 
 	void Update(){
 
-        bool onGround = Physics2D.OverlapCircle(groundTransform.position, 0.02f, groundLayerMask) != null;
+        bool onGround = Physics2D.OverlapCircle(groundTransform.position, 0.1f, groundLayerMask) != null;
 
         // get direction input
 
@@ -56,10 +54,10 @@ public class ControllerCharacter2D : MonoBehaviour{
 		direction.x = Input.GetAxis("Horizontal");
 		
 		// set velocity
+
+        velocity.x = direction.x * speed;
 		
 		if (onGround){
-
-            velocity.x = direction.x * speed;
 
             if (velocity.y < 0) velocity.y = 0;
 
