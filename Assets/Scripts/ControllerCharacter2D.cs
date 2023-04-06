@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class ControllerCharacter2D : MonoBehaviour{
 
+	[SerializeField] Animator animator;
+
 	[SerializeField] float speed;
 	
 	[SerializeField] float turnRate;
@@ -30,8 +32,12 @@ public class ControllerCharacter2D : MonoBehaviour{
 	[SerializeField] LayerMask groundLayerMask;
 
 	Rigidbody2D rb;
+
+	[SerializeField] SpriteRenderer spriteRenderer;
 	
 	Vector2 velocity = Vector2.zero;
+
+	bool faceRight = true;
 
 	void Start(){
 
@@ -61,6 +67,8 @@ public class ControllerCharacter2D : MonoBehaviour{
 			
 				velocity.y += Mathf.Sqrt(jumpHeight * -2 * Physics.gravity.y);
 
+				animator.SetTrigger("jump");
+
                 StartCoroutine(DoubleJump());
 
             }
@@ -83,7 +91,15 @@ public class ControllerCharacter2D : MonoBehaviour{
 
 		rb.velocity = velocity;
 
-        //characterController.Move(velocity * Time.deltaTime);
+		//flip character to right dir
+
+		if (velocity.x > 0 && !faceRight) flip();
+
+		if (velocity.x < 0 && faceRight) flip();
+
+		//update animator
+
+		animator.SetFloat("speed", Mathf.Abs(velocity.x));
 
 	}
 
@@ -103,6 +119,8 @@ public class ControllerCharacter2D : MonoBehaviour{
 
                 velocity.y += Mathf.Sqrt(doubleJumpHeight * -2 * Physics.gravity.y);
 
+				animator.SetTrigger("jump");
+
                 break;
             
 			}
@@ -112,5 +130,13 @@ public class ControllerCharacter2D : MonoBehaviour{
 		}
 
     }
+
+	private void flip(){
+
+		faceRight = !faceRight;
+
+		spriteRenderer.flipX = !faceRight;	
+	
+	}
 
 }
