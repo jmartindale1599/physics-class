@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEditor.Search;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 
-public class ControllerCharacter2D : MonoBehaviour{
+public class AiController2D : MonoBehaviour{
 
 	[SerializeField] Animator animator;
 
@@ -28,10 +29,24 @@ public class ControllerCharacter2D : MonoBehaviour{
 	Rigidbody2D rb;
 
 	[SerializeField] SpriteRenderer spriteRenderer;
-	
+
+	[SerializeField] Transform[] waypoints;
+
+	[Header("AI")]
+
+	[SerializeField, Range(1,5)] float rayDistance;
+
 	Vector2 velocity = Vector2.zero;
 
 	bool faceRight = true;
+
+	enum State { Idle, Patrol, Chase ,Attack}
+
+	State state = State.Idle;
+
+	float stateTimer = 5;
+
+	Transform targetPoint = null;
 
 	void Start(){
 
@@ -41,13 +56,65 @@ public class ControllerCharacter2D : MonoBehaviour{
 
 	void Update(){
 
-        bool onGround = Physics2D.OverlapCircle(groundTransform.position, 0.1f, groundLayerMask) != null;
-
-        // get direction input
-
         Vector2 direction = Vector2.zero;
+
+		//direction.x = Input.GetAxis("Horizontal");
+
+		//Do Ai things
+
+		switch (state){
+
+			case State.Idle:
+
+                if (seesPlayer()) state = State.Chase;
+
+                stateTimer += Time.deltaTime;
+
+				if (stateTimer > 0.5f){
+
+					setNewPoint();
+
+					state = State.Patrol;
+
+				}
+
+					break;
+
+			case State.Patrol:
+
+				if (seesPlayer()) state = State.Chase;
+
+				direction.x = Mathf.Sign(targetPoint.position.x - transform.position.x);
+
+				float dx = Mathf.Abs(transform.position.x - targetPoint.position.x);
+
+				if(dx <= 0.25f){
+
+					state = State.Idle;
+
+					stateTimer = 5;
+														
+				}
+
+                break;
+
+			case State.Chase:
+
+
+
+				break;
+			
+			case State.Attack:
+
+				break;
+
+			default:
+
+			break;
 		
-		direction.x = Input.GetAxis("Horizontal");
+		}
+
+		bool onGround = Physics2D.OverlapCircle(groundTransform.position, 0.1f, groundLayerMask) != null;
 		
 		// set velocity
 
@@ -132,5 +199,29 @@ public class ControllerCharacter2D : MonoBehaviour{
 		spriteRenderer.flipX = !faceRight;	
 	
 	}
+
+	void setNewPoint() {
+
+		Transform wp = null;
+
+		do{
+
+			wp = waypoints[Random.Range(0, waypoints.Length)];
+
+		} while (wp == targetPoint);
+
+		targetPoint = wp;
+	
+	}
+
+	private bool seesPlayer(){
+
+        RaycastHit2D rayHit = Physics2D.Raycast(transform.position,((faceRight) ? Vector2.right : Vector2.left), rayDistance);
+
+        Debug.DrawRay(transform.position, ((faceRight) ? Vector2.right : Vector2.left), Color.red);
+
+		return rayHit.collider != null && rayHit.collider.CompareTag("Player");
+
+    }
 
 }
