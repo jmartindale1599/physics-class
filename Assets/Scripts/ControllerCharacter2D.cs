@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor.Search;
 using UnityEngine;
 
@@ -28,7 +29,13 @@ public class ControllerCharacter2D : MonoBehaviour{
 	Rigidbody2D rb;
 
 	[SerializeField] SpriteRenderer spriteRenderer;
+
+	[Header("Attack")]
+
+	[SerializeField] Transform attackTransfrom;
 	
+	[SerializeField] float attackRad;
+
 	Vector2 velocity = Vector2.zero;
 
 	bool faceRight = true;
@@ -61,11 +68,17 @@ public class ControllerCharacter2D : MonoBehaviour{
 			
 				velocity.y += Mathf.Sqrt(jumpHeight * -2 * Physics.gravity.y);
 
-				animator.SetTrigger("jump");
+				animator.SetTrigger("Jump");
 
                 StartCoroutine(DoubleJump());
 
             }
+
+			if (Input.GetMouseButtonDown(0)){
+
+				animator.SetTrigger("Attack");
+
+			}
 
 		}
 
@@ -93,7 +106,7 @@ public class ControllerCharacter2D : MonoBehaviour{
 
 		//update animator
 
-		animator.SetFloat("speed", Mathf.Abs(velocity.x));
+		animator.SetFloat("Speed", Mathf.Abs(velocity.x));
 
 	}
 
@@ -113,7 +126,7 @@ public class ControllerCharacter2D : MonoBehaviour{
 
                 velocity.y += Mathf.Sqrt(doubleJumpHeight * -2 * Physics.gravity.y);
 
-				animator.SetTrigger("jump");
+                animator.SetTrigger("Jump");
 
                 break;
             
@@ -132,5 +145,23 @@ public class ControllerCharacter2D : MonoBehaviour{
 		spriteRenderer.flipX = !faceRight;	
 	
 	}
+
+    private void CheckAttack(){
+
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(attackTransfrom.position, attackRad);
+        
+		foreach (Collider2D collider in colliders){
+
+            if (collider.gameObject == gameObject) continue;
+
+            if (collider.gameObject.TryGetComponent<IDamagable>(out var damagable)){
+
+                damagable.Damage(10);
+
+            }
+
+        }
+
+    }
 
 }
