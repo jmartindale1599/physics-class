@@ -116,6 +116,8 @@ public class AiController2D : MonoBehaviour, IDamagable{
 				
 				{
 
+					//if the AI doesn't see its enemy it will start back to the idle state
+
 					if (enemy == null){
 
 						state = State.Idle;
@@ -126,6 +128,8 @@ public class AiController2D : MonoBehaviour, IDamagable{
 
 					}
 
+					//this determines the distance between the AI and its enemy, if it is close enough to attack the enemy
+				
 					float dx = Mathf.Abs(enemy.transform.position.x - transform.position.x);
 
 					if (dx <= 1f){
@@ -136,6 +140,8 @@ public class AiController2D : MonoBehaviour, IDamagable{
 
 					}else{
 
+						//if the enemy is not close enough it will move towards the enemy
+
 						direction.x = Mathf.Sign(enemy.transform.position.x - transform.position.x);
 
 					}
@@ -145,6 +151,8 @@ public class AiController2D : MonoBehaviour, IDamagable{
                 break;
 			
 			case State.Attack:
+
+				//this checks if the AI is still in it's attack animation, if it is it continues, if it is not, it gets set back to the chase state
 
                 if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 1 && !animator.IsInTransition(0)){
 
@@ -272,7 +280,11 @@ public class AiController2D : MonoBehaviour, IDamagable{
 
     private void CheckEnemySeen(){
 
+		//resets the enemy holder
+
         enemy = null;
+
+		//goes through all colliders found by the raycast checking for the enemy tag on each.
         
 		RaycastHit2D raycastHit = Physics2D.Raycast(transform.position, ((faceRight) ? Vector2.right : Vector2.left), rayDistance, raycastLayerMask);
         
@@ -288,7 +300,11 @@ public class AiController2D : MonoBehaviour, IDamagable{
 
     public void Damage(int damage){
 
+		//takes the current health then subtracts the set value
+
         Health-= damage;
+
+		//test code --V
 
 		print(Health);
 

@@ -16,6 +16,10 @@ public class ControllerCharacter2D : MonoBehaviour{
 
 	[SerializeField] float doubleJumpHeight;
 
+	[SerializeField] float groundAngle;
+
+	[SerializeField] float groundRadius;
+
     [SerializeField, Range(1, 5)] float fallRateMultiplier;
 
     [SerializeField, Range(1, 5)] float lowJumpRateMultiplier;
@@ -48,7 +52,7 @@ public class ControllerCharacter2D : MonoBehaviour{
 
 	void Update(){
 
-        bool onGround = Physics2D.OverlapCircle(groundTransform.position, 0.1f, groundLayerMask) != null;
+		bool onGround = Physics2D.OverlapCircle(groundTransform.position, 0.1f, groundLayerMask) != null;
 
         // get direction input
 
@@ -109,6 +113,32 @@ public class ControllerCharacter2D : MonoBehaviour{
 		animator.SetFloat("Speed", Mathf.Abs(velocity.x));
 
 	}
+
+    private bool UpdateGroundCheck(){
+
+        // check if the character is on the ground
+        
+		Collider2D collider = Physics2D.OverlapCircle(groundTransform.position, groundRadius, groundLayerMask);
+        
+		if (collider != null){
+
+            RaycastHit2D raycastHit = Physics2D.Raycast(groundTransform.position, Vector2.down, groundRadius, groundLayerMask);
+            
+			if (raycastHit.collider != null){
+
+                // get the angle of the ground (angle between up vector and ground normal)
+                
+				groundAngle = Vector2.SignedAngle(Vector2.up, raycastHit.normal);
+                
+				Debug.DrawRay(raycastHit.point, raycastHit.normal, Color.red);
+
+            }
+
+        }
+
+        return (collider != null);
+
+    }
 
     IEnumerator DoubleJump(){
 
