@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.Search;
 using UnityEngine;
@@ -69,6 +70,14 @@ public class AiController2D : MonoBehaviour, IDamagable{
 	}
 
 	void Update(){
+
+		if(Health <= 0) { 
+		
+			spriteRenderer.enabled = false;
+
+			Destroy(this); 
+		
+		}
 
 		CheckEnemySeen();
 
@@ -186,7 +195,7 @@ public class AiController2D : MonoBehaviour, IDamagable{
 
             if (velocity.y < 0) velocity.y = 0;
 
-			if (Input.GetButtonDown("Jump")){ 
+			/*if (Input.GetButtonDown("Jump")){ 
 			
 				velocity.y += Mathf.Sqrt(jumpHeight * -2 * Physics.gravity.y);
 
@@ -194,7 +203,7 @@ public class AiController2D : MonoBehaviour, IDamagable{
 
                 StartCoroutine(DoubleJump());
 
-            }
+            }*/
 
 		}
 
