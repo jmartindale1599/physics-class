@@ -42,7 +42,13 @@ public class AiController2D : MonoBehaviour, IDamagable{
 
 	[SerializeField] float Health;
 
-	Vector2 velocity = Vector2.zero;
+    [Header("Attack")]
+
+    [SerializeField] Transform attackTransfrom;
+
+    [SerializeField] float attackRad;
+
+    Vector2 velocity = Vector2.zero;
 
 	bool faceRight = true;
 
@@ -137,6 +143,8 @@ public class AiController2D : MonoBehaviour, IDamagable{
 						state = State.Attack;
 
 						animator.SetTrigger("Attack");
+
+						CheckAttack();
 
 					}else{
 
@@ -307,6 +315,24 @@ public class AiController2D : MonoBehaviour, IDamagable{
 		//test code --V
 
 		print(Health);
+
+    }
+
+	private void CheckAttack(){
+
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(attackTransfrom.position, attackRad);
+        
+		foreach (Collider2D collider in colliders){
+
+            if (collider.gameObject == gameObject) continue;
+
+            if (collider.gameObject.TryGetComponent<IDamagable>(out var damagable)){
+
+                damagable.Damage(10);
+
+            }
+
+        }
 
     }
 

@@ -6,7 +6,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 
-public class ControllerCharacter2D : MonoBehaviour{
+public class ControllerCharacter2D : MonoBehaviour, IDamagable{
 
 	[SerializeField] Animator animator;
 
@@ -40,17 +40,48 @@ public class ControllerCharacter2D : MonoBehaviour{
 	
 	[SerializeField] float attackRad;
 
+	int Hits = 3; // how long until it dies
+
 	Vector2 velocity = Vector2.zero;
 
 	bool faceRight = true;
 
-	void Start(){
+    enum State { NoHit, Hit1, Hit2, Death }
+
+    State state = State.NoHit;
+
+    void Start(){
 
 		rb = GetComponent<Rigidbody2D>();
 
 	}
 
 	void Update(){
+
+		switch (state){ 
+		
+			case State.Hit1:
+
+				//lives -- for screen or whatever i physically and mentally don't give a damn
+
+				break;
+
+			case State.Hit2:
+
+				//idk increase speed and attack or something ffs
+
+				break;
+
+			case State.Death:
+
+                //death
+
+                animator.SetTrigger("Death");
+
+                break;
+
+		
+		}
 
 		bool onGround = Physics2D.OverlapCircle(groundTransform.position, 0.1f, groundLayerMask) != null;
 
@@ -81,6 +112,8 @@ public class ControllerCharacter2D : MonoBehaviour{
 			if (Input.GetMouseButtonDown(0)){
 
 				animator.SetTrigger("Attack");
+
+				CheckAttack();
 
 			}
 
@@ -193,5 +226,17 @@ public class ControllerCharacter2D : MonoBehaviour{
         }
 
     }
+
+    public void Damage(int damage){
+
+		Hits--;
+
+		if (Hits == 2) { state = State.Hit1; }
+
+		if (Hits == 1) { state = State.Hit2; }
+		
+		if (Hits == 0) { state = State.Death; }
+    
+	}
 
 }
