@@ -11,7 +11,7 @@ public class CollisionEvent : MonoBehaviour{
 		Vector3 position = collision.GetContact(0).point;
 		
 		DrawMarker(position, size, Color.red, 2);
-	
+			
 	}
 
 	private void OnCollisionExit(Collision collision) {

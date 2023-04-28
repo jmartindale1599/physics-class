@@ -40,6 +40,12 @@ public class ControllerCharacter2D : MonoBehaviour, IDamagable{
 	
 	[SerializeField] float attackRad;
 
+	[Header("Win/Loose")]
+
+	[SerializeField] Canvas wincon;
+
+	[SerializeField] Canvas loose;
+
 	int Hits = 3; // how long until it dies
 
 	Vector2 velocity = Vector2.zero;
@@ -78,12 +84,24 @@ public class ControllerCharacter2D : MonoBehaviour, IDamagable{
 
                 animator.SetTrigger("Death");
 
+				if(loose.isActiveAndEnabled == false){
+
+					Debug.Log("screem");
+
+					loose.gameObject.SetActive(true);
+					
+				}
+
+				//loose.isActiveAndEnabled = true;
+
+                //Destroy(gameObject, 3);
+
                 break;
 
 		
 		}
 
-		bool onGround = Physics2D.OverlapCircle(groundTransform.position, 0.1f, groundLayerMask) != null;
+        bool onGround = Physics2D.OverlapCircle(groundTransform.position, 0.1f, groundLayerMask) != null;
 
         // get direction input
 
@@ -147,32 +165,6 @@ public class ControllerCharacter2D : MonoBehaviour, IDamagable{
 
 	}
 
-    private bool UpdateGroundCheck(){
-
-        // check if the character is on the ground
-        
-		Collider2D collider = Physics2D.OverlapCircle(groundTransform.position, groundRadius, groundLayerMask);
-        
-		if (collider != null){
-
-            RaycastHit2D raycastHit = Physics2D.Raycast(groundTransform.position, Vector2.down, groundRadius, groundLayerMask);
-            
-			if (raycastHit.collider != null){
-
-                // get the angle of the ground (angle between up vector and ground normal)
-                
-				groundAngle = Vector2.SignedAngle(Vector2.up, raycastHit.normal);
-                
-				Debug.DrawRay(raycastHit.point, raycastHit.normal, Color.red);
-
-            }
-
-        }
-
-        return (collider != null);
-
-    }
-
     IEnumerator DoubleJump(){
 
         // wait a little after the jump to allow a double jump
@@ -220,6 +212,14 @@ public class ControllerCharacter2D : MonoBehaviour, IDamagable{
             if (collider.gameObject.TryGetComponent<IDamagable>(out var damagable)){
 
                 damagable.Damage(10);
+
+            }
+
+			if(collider.gameObject.TryGetComponent<IWinCo>(out var win)){
+
+				Debug.Log("chicky");
+
+                wincon.gameObject.SetActive(true);
 
             }
 
